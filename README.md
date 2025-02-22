@@ -31,6 +31,6 @@ A **decentralized voting application** built with **Solidity, Next.js, TypeScrip
 ### **1️⃣ Clone the Repository**
 
 ```sh
-git clone https://github.com/yourusername/web3-voting-dapp.git
+git clone  https://github.com/07ReuelBodhak/web3-voting-dapp.git
 cd web3-voting-dapp
 ```
