@@ -78,9 +78,6 @@ export const Web3Provider: React.FC<{ children: React.ReactNode }> = ({
       const contractAddress = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS;
 
       if (!rpcUrl || !contractAddress) {
-        console.error(
-          "RPC_URL or CONTRACT_ADDRESS is missing in environment variables"
-        );
         return;
       }
 
@@ -113,8 +110,6 @@ export const Web3Provider: React.FC<{ children: React.ReactNode }> = ({
         votesData[lang] = Number(voteCount);
       }
       setVotes(votesData);
-    } catch (error) {
-      console.error("Error fetching votes:", error);
     } finally {
       setFetchingVotes(false);
     }
@@ -137,7 +132,7 @@ export const Web3Provider: React.FC<{ children: React.ReactNode }> = ({
     try {
       setLoading(true);
       const browserProvider = new ethers.BrowserProvider(
-        (window as any).ethereum
+        (window as { ethereum?: ethers.Eip1193Provider }).ethereum!
       );
       const signer = await browserProvider.getSigner();
       const contractWithSigner = contract.connect(signer) as VotingContract;
@@ -148,12 +143,11 @@ export const Web3Provider: React.FC<{ children: React.ReactNode }> = ({
 
       await fetchVotes(contract);
       setVoted(true);
-    } catch (err: any) {
-      console.log("Error:", err);
-      if (err.reason?.includes("AlreadyVoted")) {
+    } catch (err) {
+      if ((err as { reason?: string }).reason?.includes("AlreadyVoted")) {
         alert("You have already voted!");
         setVoted(true);
-      } else if (err.code === "ACTION_REJECTED") {
+      } else if ((err as { code?: string }).code === "ACTION_REJECTED") {
         alert("Transaction rejected by user");
       } else {
         alert("Failed to cast vote or you must have already voted");
@@ -174,19 +168,18 @@ export const Web3Provider: React.FC<{ children: React.ReactNode }> = ({
       return;
     }
 
-    if (!(window as any).ethereum) {
+    if (!(window as { ethereum?: ethers.Eip1193Provider }).ethereum) {
       alert("MetaMask is not installed");
       return;
     }
 
     try {
       const browserProvider = new ethers.BrowserProvider(
-        (window as any).ethereum
+        (window as { ethereum?: ethers.Eip1193Provider }).ethereum!
       );
       const accounts = await browserProvider.send("eth_requestAccounts", []);
       setAddress(accounts[0]);
-    } catch (err) {
-      console.error("Unable to connect wallet:", err);
+    } catch {
       alert("Unable to connect wallet");
     }
   };
